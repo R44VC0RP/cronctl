@@ -4,6 +4,15 @@ set -eu
 repo=R44VC0RP/cronctl
 version=${CRONCTL_VERSION:-latest}
 
+install_agent_skill() {
+  if ! command -v npx >/dev/null 2>&1; then
+    echo "npx is required to install the agent skill." >&2
+    echo "Install it later with: npx skills add $repo --skill cronctl -g" >&2
+    return 1
+  fi
+  npx --yes skills add "$repo" --skill cronctl -g -y
+}
+
 command -v curl >/dev/null 2>&1 || {
   echo "cronctl installer: curl is required" >&2
   exit 1
@@ -82,3 +91,22 @@ case ":$PATH:" in
   *) echo "Add $install_dir to PATH to run cronctl from any shell." ;;
 esac
 echo "Run 'cronctl service install' when you are ready to start the scheduler."
+
+case "${CRONCTL_INSTALL_SKILL:-ask}" in
+  1|true|yes)
+    install_agent_skill || true
+    ;;
+  0|false|no)
+    ;;
+  *)
+    if command -v npx >/dev/null 2>&1 && (: </dev/tty) 2>/dev/null; then
+      printf "Install the cronctl agent skill with skills.sh? [y/N] " >/dev/tty
+      IFS= read -r answer </dev/tty || answer=
+      case "$answer" in
+        y|Y|yes|YES|Yes) install_agent_skill || true ;;
+      esac
+    elif ! command -v npx >/dev/null 2>&1; then
+      echo "Optional agent skill: npx skills add $repo --skill cronctl -g"
+    fi
+    ;;
+esac

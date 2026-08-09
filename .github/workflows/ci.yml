@@ -45,5 +45,6 @@ jobs:
           go-version-file: go.mod
           cache: true
       - run: bash -n install.sh scripts/package-release.sh
+      - run: npx --yes skills add . --list
       - run: ./scripts/package-release.sh ci dist
       - run: test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 7

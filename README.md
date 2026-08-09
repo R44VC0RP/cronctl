@@ -1,5 +1,7 @@
 # cronctl
 
+[![skills.sh](https://skills.sh/b/R44VC0RP/cronctl)](https://skills.sh/R44VC0RP/cronctl)
+
 `cronctl` is a cross-platform, agent-friendly task scheduler. It provides one
 predictable CLI and hides the user-level `launchd`, `systemd`, or Windows logon
 configuration needed to keep schedules running.
@@ -56,6 +58,27 @@ install the per-user service explicitly:
 cronctl service install --dry-run
 cronctl service install
 ```
+
+## Agent Skill
+
+The installers offer to install the optional `cronctl` Agent Skill when running
+interactively. The skill teaches supported coding agents how to validate,
+schedule, inspect, and safely modify cronctl jobs. Install it directly through
+[skills.sh](https://skills.sh):
+
+```sh
+npx skills add R44VC0RP/cronctl --skill cronctl -g
+```
+
+Install non-interactively for a specific agent:
+
+```sh
+npx skills add R44VC0RP/cronctl --skill cronctl -g -a opencode -y
+```
+
+Set `CRONCTL_INSTALL_SKILL=1` to include the skill during unattended binary
+installation, or `CRONCTL_INSTALL_SKILL=0` to suppress the interactive offer.
+The canonical skill source is [`skills/cronctl/SKILL.md`](skills/cronctl/SKILL.md).
 
 ## Build From Source
 

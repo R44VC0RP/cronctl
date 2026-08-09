@@ -7,6 +7,17 @@ param(
 $ErrorActionPreference = "Stop"
 $repo = "R44VC0RP/cronctl"
 
+function Install-CronctlAgentSkill {
+    if (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
+        Write-Warning "npx is required to install the agent skill. Install it later with: npx skills add $repo --skill cronctl -g"
+        return
+    }
+    & npx --yes skills add $repo --skill cronctl -g -y
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "The cronctl binary was installed, but agent skill installation failed."
+    }
+}
+
 $architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
 switch ($architecture) {
     "X64" { $arch = "amd64" }
@@ -65,4 +76,21 @@ try {
     Write-Host "Run 'cronctl service install' when you are ready to start the scheduler."
 } finally {
     Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
+}
+
+$skillPreference = if ($env:CRONCTL_INSTALL_SKILL) { $env:CRONCTL_INSTALL_SKILL.ToLowerInvariant() } else { "ask" }
+switch -Regex ($skillPreference) {
+    "^(1|true|yes)$" { Install-CronctlAgentSkill }
+    "^(0|false|no)$" { }
+    default {
+        $interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected
+        if ($interactive -and (Get-Command npx -ErrorAction SilentlyContinue)) {
+            $answer = Read-Host "Install the cronctl agent skill with skills.sh? [y/N]"
+            if ($answer -match "^(y|yes)$") {
+                Install-CronctlAgentSkill
+            }
+        } elseif (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
+            Write-Host "Optional agent skill: npx skills add $repo --skill cronctl -g"
+        }
+    }
 }
