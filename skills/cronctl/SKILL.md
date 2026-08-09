@@ -1,8 +1,8 @@
 ---
 name: cronctl
-description: Schedule, inspect, run, and troubleshoot recurring local tasks with the cross-platform cronctl CLI on macOS, Linux, and Windows. Use when the user asks to schedule commands or scripts, replace cron/launchd/systemd/Task Scheduler setup, handle missed runs after sleep, inspect run history or logs, or manage cronctl jobs declaratively.
+description: Schedule, inspect, run, and troubleshoot recurring local tasks with an already-installed cronctl CLI on macOS, Linux, and Windows. Use when the user asks to schedule commands or scripts, handle missed runs after sleep, inspect run history or logs, or manage cronctl jobs declaratively.
 license: MIT
-compatibility: Requires the cronctl CLI. Background scheduling uses an explicitly installed per-user service.
+compatibility: Requires the cronctl CLI to be installed and available on PATH.
 metadata:
   author: R44VC0RP
   version: "0.2.0"
@@ -10,27 +10,19 @@ metadata:
 
 # cronctl
 
-Use `cronctl` for recurring local command execution without editing native OS
-service definitions. Prefer its structured, non-interactive interface over
-manually configuring cron, launchd, systemd, or Windows Task Scheduler.
+Use `cronctl` for recurring local command execution through its structured,
+non-interactive interface.
 
 ## First Check
 
 1. Run `cronctl capabilities --json` to confirm the CLI and supported features.
 2. Run `cronctl status --json` before claiming that scheduled jobs are active.
-3. If the CLI is absent, tell the user and ask before installing executable
-   software. Use only the official commands:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/R44VC0RP/cronctl/main/install.sh | sh
-```
-
-```powershell
-irm https://raw.githubusercontent.com/R44VC0RP/cronctl/main/install.ps1 | iex
-```
-
-Do not install or enable the scheduler service without explicit user approval.
-It creates login persistence for the current user.
+3. If the CLI is absent, stop. Tell the user that `cronctl` must be installed
+   through their approved software-management process before continuing. Do not
+   download, install, or execute external software from this skill.
+4. If status reports that background scheduling is inactive, state clearly
+   that scheduled jobs will not run. Do not perform host-level configuration
+   changes from this skill.
 
 ## Schedule A Job
 
@@ -38,7 +30,8 @@ It creates login persistence for the current user.
 2. Validate it and show the next occurrences.
 3. Add the named job using an argv command after `--`.
 4. Confirm the resulting next fires and scheduler state from JSON output.
-5. If scheduling is not active, ask before running `cronctl service install`.
+5. If scheduling is inactive, report that condition and stop after showing the
+   saved job state. Leave host-level scheduler activation to the user.
 
 Use `--every` for fixed intervals:
 
@@ -99,8 +92,9 @@ it does not require the daemon. Its process exit code is propagated.
   using `--replace`; do not replace automatically.
 - Prefer `cronctl pause JOB` over deletion when the user's intent may be
   temporary. Resume with `cronctl resume JOB`.
-- Get explicit approval before `cronctl rm`, `cronctl service install`, or
-  `cronctl service uninstall`.
+- Get explicit approval before `cronctl rm`.
+- Never modify host-level configuration, package installations, or executable
+  files from this skill.
 - Put `--json` before the command separator. A child command may independently
   receive its own `--json` after `--`.
 
